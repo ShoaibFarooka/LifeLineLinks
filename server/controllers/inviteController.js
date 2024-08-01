@@ -4,9 +4,8 @@ const SendInvites = async (req, res, next) => {
     try {
         const { invitees } = req.body;
         const invitedBy = res.locals.payload.id;
-        // const invitedBy = '66942e38fa20914a1b045c44';
-        await inviteService.createInvite(invitedBy, invitees);
-        // await inviteService.sendInvites(invitees);
+        const newInvite = await inviteService.createInvite(invitedBy, invitees);
+        // await inviteService.sendInvites(invitees, newInvite);
         res.status(200).send('Invites sent successfully');
     } catch (error) {
         next(error);

@@ -6,11 +6,13 @@ const createInvite = async (invitedBy, invitees) => {
         invitedBy,
         invitees
     });
-    return newInvite;
+    const populatedInvite = await Invite.findById(newInvite._id).populate({path: 'invitedBy', select: 'name number'});
+
+    return populatedInvite;
 };
 
-const sendInvites = async (invitees) => {
-    const body = 'test message!';
+const sendInvites = async (invitees, invite) => {
+    const body = `${invite.invitedBy.name} invited you to Life Line Links! Click the link to view your invites: yourdomain:/login`;
     for (let invitee of invitees) {
         await twilioService.sendSMS(invitee.number, body);
     }
@@ -18,19 +20,23 @@ const sendInvites = async (invitees) => {
 
 const fetchUserPendingInvites = async (number) => {
     const invites = await Invite.find({
-        'invitees.number': number,
-        'invitees.status': 'pending'
+        invitees: { $elemMatch: { number: number, status: 'pending' } }
     })
         .populate({
             path: 'invitedBy',
             select: 'name number'
         });
+
     if (!invites || invites.length <= 0) {
-        const error = new Error('Invites not found!');
+        const error = new Error('Pending invites not found!');
         error.code = 404;
         throw error;
     }
-    const formattedInvites = invites.map(invite => ({ inviteId: invite._id, invitedBy: invite.invitedBy }));
+
+    const formattedInvites = invites.map(invite => ({
+        inviteId: invite._id,
+        invitedBy: invite.invitedBy
+    }));
 
     return formattedInvites;
 };

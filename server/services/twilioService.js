@@ -25,6 +25,14 @@ const sendSMS = async (to, body) => {
     }
 };
 
+const test = async () => {
+    const body = 'testing twilio23...';
+    const number = '+16176920988';
+await sendSMS(number, body);
+};
+
+// test();
+
 module.exports = {
     sendSMS
 };
